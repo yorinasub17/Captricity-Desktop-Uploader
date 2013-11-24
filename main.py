@@ -25,12 +25,12 @@ class MainWindow(QtGui.QtMainWindow):
         self.resize(350, 250)
         self.setWindowTitle(APP_NAME)
 
-        new_upload = QtGui.QAction(QtGui.QIcon('icons/document-send.png'), 'New Upload', self)
+        new_upload = QtGui.QAction(QtGui.QIcon('icons/Gnome-mail-message-new.svg'), 'New Upload', self)
         new_upload.setShortcut('Ctrl+N')
         new_upload.setStatusTip('Initiate a new upload to Captricity')
         self.connect(new_upload, QtCore.SIGNAL('triggered()'), self.initiate_new_upload)
 
-        exit = QtGui.QAction(QtGui.QIcon('icons/exit.png'), 'Exit', self)
+        exit = QtGui.QAction(QtGui.QIcon('icons/Gnome-application-exit.svg'), 'Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.setStatusTip('Exit application')
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
