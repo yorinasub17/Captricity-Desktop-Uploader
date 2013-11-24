@@ -19,8 +19,9 @@ if api_token is None:
 
 # Now initialize the main app
 class MainWindow(QtGui.QtMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
+    def __init__(self, api_token, parent=None):
+        self.api_token = api_token
+        super(MainWindow, self).__init__(parent)
 
         self.resize(350, 250)
         self.setWindowTitle(APP_NAME)
@@ -46,12 +47,11 @@ class MainWindow(QtGui.QtMainWindow):
         toolbar.addAction(new_upload)
         toolbar.addAction(exit)
 
-        self.new_upload_window = NewUploadWindow(self)
-
     def initiate_new_upload(self):
-        self.new_upload_window.exec_()
+        new_upload_window = NewUploadWindow(api_token, self)
+        new_upload_window.exec_()
  
 app = QtGui.QApplication(sys.argv)
-main = MainWindow()
+main = MainWindow(api_token)
 main.show()
 sys.exit(app.exec_())
