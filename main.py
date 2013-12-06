@@ -79,6 +79,7 @@ class MainWidget(QtGui.QWidget):
         pbar = UploadTracker(upload_manager)
         self.progress_bars.append(pbar)
         self.layout_.addWidget(pbar)
+        upload_manager.start()
 
 app = QtGui.QApplication(sys.argv)
 main = MainWindow(cap_client, pool)
