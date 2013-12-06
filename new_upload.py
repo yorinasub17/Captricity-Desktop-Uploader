@@ -28,7 +28,7 @@ class NewUploadWindow(QtGui.QWidget):
         self.load_list_window(document_getter, self.document_upload_callback_func_generator)
 
     def upload_to_job(self):
-        job_getter = lambda: self.cap_client.read_jobs('?status=pending')
+        job_getter = lambda: self.cap_client.read_jobs('?status=setup')
         self.load_list_window(job_getter, self.job_upload_callback_func_generator)
 
     def cancel(self):
@@ -89,7 +89,7 @@ class NewUploadWindow(QtGui.QWidget):
         buttons = []
         for obj in captricity_objects:
             button = QtGui.QPushButton(obj['name'], self)
-            self.connect(button, QtCore.SIGNAL('clicked()'), callback_func_generator(obj['id']))
+            self.connect(button, QtCore.SIGNAL('clicked()'), callback_func_generator(obj))
             buttons.append(button)
 
         refresh_button = QtGui.QPushButton('Refresh', self)
