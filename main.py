@@ -5,7 +5,7 @@ from captools.api import Client
 
 from PyQt4 import QtGui, QtCore
 
-from new_upload import NewUploadWindow
+from new_upload import NewUploadWindow, UploadTracker
 
 APP_NAME = "capdesk"
 
@@ -50,6 +50,9 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addAction(new_upload)
         toolbar.addAction(exit)
 
+        self.main_widget = MainWidget(self)
+        self.setCentralWidget(self.main_widget)
+
     def initiate_new_upload(self):
         self.new_upload_window = NewUploadWindow(cap_client, self)
         self.new_upload_window.resize(350, 250)
@@ -57,7 +60,23 @@ class MainWindow(QtGui.QMainWindow):
 
     def close_new_upload(self):
         self.new_upload_window = None
- 
+
+    def add_upload_tracker(self, upload_manager):
+        self.main_widget.add_upload_tracker(upload_manager)
+
+class MainWidget(QtGui.QWidget):
+    def __init__(self, parent=None):
+        self.progress_bars = []
+        super(MainWidget, self).__init__(parent)
+
+        self.layout_ = QtGui.QVBoxLayout()
+        self.setLayout(self.layout_)
+
+    def add_upload_tracker(self, upload_manager):
+        pbar = UploadTracker(upload_manager)
+        self.progress_bars.append(pbar)
+        self.layout_.addWidget(pbar)
+
 app = QtGui.QApplication(sys.argv)
 main = MainWindow(cap_client)
 main.show()

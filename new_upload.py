@@ -53,7 +53,7 @@ class NewUploadWindow(QtGui.QWidget):
     def upload(self):
         # Trigger upload
         self.close()
-        print 'Triggering upload!'
+        self.main_window.add_upload_tracker(self.upload_manager)
 
     def load_menu_window(self):
         delete_layout(self.layout_)
@@ -139,14 +139,33 @@ class NewUploadWindow(QtGui.QWidget):
         self.layout_.addLayout(actions_layout)
         self.refresh_layout()
 
-class UploadToDocument(object):
-    def __init__(self, document_id, directory):
-        self.document_id = document_id
+class UploadTracker(QtGui.QWidget):
+    def __init__(self, upload_manager, parent=None):
+        self.upload_manager = upload_manager
+        super(UploadTracker, self).__init__(parent)
+
+        self.load_window()
+        
+    def load_window(self):
+        self.resize(300, 50)
+        self.label = QtGui.QLabel(self.upload_manager.label, self)
+        self.pbar = QtGui.QProgressBar(self)
+        self.pbar.setValue(0)
+        self.pbar.setGeometry(0, 25, 200, 25)
+
+class Uploader(object):
+    def __init__(self, directory):
         self.directory = directory
         self.files = natural_sort(glob.glob(os.path.join(directory, '*')))
+
+class UploadToDocument(Uploader):
+    def __init__(self, document_id, directory):
+        self.document_id = document_id
+        super(UploadToDocument, self).__init__(directory)
+        self.label = 'Document %s: %s' % (self.document_id, self.directory)
 
 class UploadToJob(object):
     def __init__(self, job_id, directory):
         self.job_id = job_id
-        self.directory = directory
-        self.files = natural_sort(glob.glob(os.path.join(directory, '*')))
+        super(UploadToJob, self).__init__(directory)
+        self.label = 'Job %s: %s' % (self.job_id, self.directory)
