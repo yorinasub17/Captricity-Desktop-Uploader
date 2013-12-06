@@ -1,6 +1,7 @@
 import sys
 import keyring
 import getpass
+import multiprocessing
 from captools.api import Client
 
 from PyQt4 import QtGui, QtCore
@@ -19,11 +20,13 @@ if not api_token:
     keyring.set_password(APP_NAME, username, api_token.strip())
 
 cap_client = Client(api_token)
+pool = multiprocessing.Pool(multiprocessing.cpu_count() * 2)
 
 # Now initialize the main app
 class MainWindow(QtGui.QMainWindow):
-    def __init__(self, cap_client, parent=None):
+    def __init__(self, cap_client, pool, parent=None):
         self.cap_client = cap_client
+        self.pool = pool
         super(MainWindow, self).__init__(parent)
 
         self.resize(350, 250)
@@ -78,6 +81,6 @@ class MainWidget(QtGui.QWidget):
         self.layout_.addWidget(pbar)
 
 app = QtGui.QApplication(sys.argv)
-main = MainWindow(cap_client)
+main = MainWindow(cap_client, pool)
 main.show()
 sys.exit(app.exec_())
