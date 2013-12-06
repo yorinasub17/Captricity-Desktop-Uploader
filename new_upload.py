@@ -4,6 +4,7 @@ Contains all the GUI and backend code to initiate new uploads to Captricity.
 import os
 import glob
 import itertools
+from captools.api import Client
 
 from PyQt4 import QtCore, QtGui
 
@@ -166,7 +167,7 @@ class Uploader(object):
         self.pool = pool
         self.directory = directory
         self.files = natural_sort(glob.glob(os.path.join(directory, '*')))
-        self.grouped_files = itertools.izip_longest(*(iter(self.files),) * sheet_count)
+        self.grouped_files = list(itertools.izip_longest(*(iter(self.files),) * sheet_count))
 
     def link_pbar(self, pbar):
         self.linked_pbar = pbar
@@ -178,9 +179,9 @@ class Uploader(object):
             self.job_id = new_job['id']
         self.result_set = [0 for i in range(len(self.grouped_files))]
         for i, files in enumerate(self.grouped_files):
-            self.pool.apply_async(upload_iset, (self.client, self.job_id, files), callback=self.upload_finished_callback_generator(i))
+            self.pool.apply_async(upload_iset, (self.client.api_token, self.job_id, files), callback=self.upload_finished_callback_generator(i))
 
-    def upload_finished_callback_generatory(self, idx):
+    def upload_finished_callback_generator(self, idx):
         def callback():
             if self.result_set is not None:
                 self.result_set[idx] = 1
@@ -200,7 +201,8 @@ class UploadToJob(Uploader):
         super(UploadToJob, self).__init__(client, pool, sheet_count, directory)
         self.label = 'Job %s: %s' % (self.job_id, self.directory)
 
-def upload_iset(client, job_id, files):
+def upload_iset(api_token, job_id, files):
+    client = Client(api_token)
     iset = client.create_instance_sets(job_id)
     for i, fname in enumerate(files):
         client.create_instance_set_instances(iset['id'], {'image_file': open(fname), 'page_number': str(i)})
