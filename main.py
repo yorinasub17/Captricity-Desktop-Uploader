@@ -11,30 +11,40 @@ from new_upload import NewUploadWindow, UploadTracker
 APP_NAME = "capdesk"
 
 username = getpass.getuser()
+client = None
 
-def show_api_token_required_message():
-    QtGui.QMessageBox.critical(None, 'Required API Token', 'A valid Captricity API Token is required to use the Captricity Desktop Client')
+class ApiTokenDialog(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super(ApiTokenDialog, self).__init__(parent)
+
+        self.setWindowTitle('API Token')
+        self.instructions = QtGui.QLabel('Please enter your Captricity API Token', self)
+        self.api_token_text = QtGui.QLineEdit(self)
+        self.ok_button = QtGui.QPushButton('Ok', self)
+        self.ok_button.clicked.connect(self.handle_ok)
+
+        actions_layout = QtGui.QHBoxLayout()
+        actions_layout.addStretch(1)
+        actions_layout.addWidget(self.ok_button)
+
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.instructions)
+        layout.addWidget(self.api_token_text)
+        layout.addLayout(actions_layout)
+
+    def handle_ok(self):
+        self.api_token = self.api_token_text.text().strip()
+        try:
+            self.client = Client(self.api_token)
+            keyring.set_password(APP_NAME, username, self.api_token)
+            self.accept()
+        except:
+            QtGui.QMessageBox.warning(self, 'Required API Token', 'A valid Captricity API Token is required to use the Captricity Desktop Client')
+
 
 # Now initialize the main app
 class MainWindow(QtGui.QMainWindow):
-    def __init__(self, parent=None):
-        # Obtain the API token from the keyring if it exists. Otherwise, have the user enter it.
-        api_token = keyring.get_password(APP_NAME, username)
-        if not api_token:
-            #Open dialog box to obtain api_token from user and store it
-            ok = False
-            while not ok:
-                api_token, ok = QtGui.QInputDialog.getText(self, 'API Token', 'Please enter your Captricity API Token').strip()
-                if not ok:
-                    show_api_token_required_message()
-                else:
-                    try:
-                        client = Client(api_token)
-                    except:
-                        ok = False
-                        show_api_token_required_message()
-            keyring.set_password(APP_NAME, username, api_token.strip())
-
+    def __init__(self, client, parent=None):
         self.cap_client = client
         self.pool = multiprocessing.Pool(multiprocessing.cpu_count() * 2)
         super(MainWindow, self).__init__(parent)
@@ -92,6 +102,18 @@ class MainWidget(QtGui.QWidget):
         upload_manager.start()
 
 app = QtGui.QApplication(sys.argv)
-main = MainWindow()
+
+# Obtain the API token from the keyring if it exists. Otherwise, have the user enter it.
+api_token = keyring.get_password(APP_NAME, username)
+if not api_token:
+    #Open dialog box to obtain api_token from user and store it
+    dialog = ApiTokenDialog()
+    if not dialog.exec_() == QtGui.QDialog.Accepted:
+        sys.exit(0)
+    client = dialog.client
+else:
+    client = Client(api_token)
+
+main = MainWindow(client)
 main.show()
 sys.exit(app.exec_())
