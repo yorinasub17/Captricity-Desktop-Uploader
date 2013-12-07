@@ -182,7 +182,7 @@ class Uploader(object):
             self.pool.apply_async(upload_iset, (self.client.api_token, self.job_id, files), callback=self.upload_finished_callback_generator(i))
 
     def upload_finished_callback_generator(self, idx):
-        def callback():
+        def callback(result):
             if self.result_set is not None:
                 self.result_set[idx] = 1
                 self.linked_pbar.setValue(int(sum(self.result_set) * 100 / len(self.result_set)))
@@ -203,6 +203,6 @@ class UploadToJob(Uploader):
 
 def upload_iset(api_token, job_id, files):
     client = Client(api_token)
-    iset = client.create_instance_sets(job_id)
+    iset = client.create_instance_sets(job_id, {})
     for i, fname in enumerate(files):
         client.create_instance_set_instances(iset['id'], {'image_file': open(fname), 'page_number': str(i)})
