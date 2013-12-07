@@ -16,6 +16,7 @@ client = None
 class ApiTokenDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         super(ApiTokenDialog, self).__init__(parent)
+        self.resize(250, 100)
 
         self.setWindowTitle('API Token')
         self.instructions = QtGui.QLabel('Please enter your Captricity API Token', self)
@@ -31,11 +32,13 @@ class ApiTokenDialog(QtGui.QDialog):
         layout.addWidget(self.instructions)
         layout.addWidget(self.api_token_text)
         layout.addLayout(actions_layout)
+        self.setLayout(layout)
 
     def handle_ok(self):
-        self.api_token = self.api_token_text.text().strip()
+        self.api_token = str(self.api_token_text.text()).strip()
         try:
             self.client = Client(self.api_token)
+            self.client.read_user_profile()
             keyring.set_password(APP_NAME, username, self.api_token)
             self.accept()
         except:
@@ -105,6 +108,7 @@ app = QtGui.QApplication(sys.argv)
 
 # Obtain the API token from the keyring if it exists. Otherwise, have the user enter it.
 api_token = keyring.get_password(APP_NAME, username)
+api_token = ''
 if not api_token:
     #Open dialog box to obtain api_token from user and store it
     dialog = ApiTokenDialog()
