@@ -12,21 +12,31 @@ APP_NAME = "capdesk"
 
 username = getpass.getuser()
 
-# Obtain the API token from the keyring if it exists. Otherwise, have the user enter it.
-api_token = keyring.get_password(APP_NAME, username)
-if not api_token:
-    #TODO open dialog box to obtain api_token from user and store it
-    api_token = raw_input('Enter your API token: ')
-    keyring.set_password(APP_NAME, username, api_token.strip())
-
-cap_client = Client(api_token)
-pool = multiprocessing.Pool(multiprocessing.cpu_count() * 2)
+def show_api_token_required_message():
+    QtGui.QMessageBox.critical(None, 'Required API Token', 'A valid Captricity API Token is required to use the Captricity Desktop Client')
 
 # Now initialize the main app
 class MainWindow(QtGui.QMainWindow):
-    def __init__(self, cap_client, pool, parent=None):
-        self.cap_client = cap_client
-        self.pool = pool
+    def __init__(self, parent=None):
+        # Obtain the API token from the keyring if it exists. Otherwise, have the user enter it.
+        api_token = keyring.get_password(APP_NAME, username)
+        if not api_token:
+            #Open dialog box to obtain api_token from user and store it
+            ok = False
+            while not ok:
+                api_token, ok = QtGui.QInputDialog.getText(self, 'API Token', 'Please enter your Captricity API Token').strip()
+                if not ok:
+                    show_api_token_required_message()
+                else:
+                    try:
+                        client = Client(api_token)
+                    except:
+                        ok = False
+                        show_api_token_required_message()
+            keyring.set_password(APP_NAME, username, api_token.strip())
+
+        self.cap_client = client
+        self.pool = multiprocessing.Pool(multiprocessing.cpu_count() * 2)
         super(MainWindow, self).__init__(parent)
 
         self.resize(350, 250)
@@ -57,7 +67,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.main_widget)
 
     def initiate_new_upload(self):
-        self.new_upload_window = NewUploadWindow(cap_client, self)
+        self.new_upload_window = NewUploadWindow(self.cap_client, self)
         self.new_upload_window.resize(350, 250)
         self.new_upload_window.show()
 
@@ -82,6 +92,6 @@ class MainWidget(QtGui.QWidget):
         upload_manager.start()
 
 app = QtGui.QApplication(sys.argv)
-main = MainWindow(cap_client, pool)
+main = MainWindow()
 main.show()
 sys.exit(app.exec_())
