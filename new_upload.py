@@ -142,6 +142,8 @@ class NewUploadWindow(QtGui.QWidget):
         self.refresh_layout()
 
 class UploadTracker(QtGui.QWidget):
+    image_uploaded = QtCore.pyqtSignal()
+
     def __init__(self, upload_manager, parent=None):
         self.upload_manager = upload_manager
         self.upload_manager.link_pbar(self)
@@ -149,7 +151,6 @@ class UploadTracker(QtGui.QWidget):
 
         self.load_window()
 
-        self.image_uploaded = QtCore.Signal()
         self.image_uploaded.connect(self.handle_update)
         
     def load_window(self):
@@ -194,7 +195,7 @@ class Uploader(object):
 
     @property
     def progress(self):
-        return int(sum(self.result_set) / len(self.result_set))
+        return int(sum(self.result_set) * 100 / len(self.result_set))
 
 class UploadToDocument(Uploader):
     def __init__(self, client, pool, document_id, sheet_count, directory):
