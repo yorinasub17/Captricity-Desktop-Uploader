@@ -4,7 +4,7 @@ import getpass
 import multiprocessing
 from captools.api import Client
 
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 from new_upload import NewUploadWindow, UploadTracker
 
@@ -95,20 +95,31 @@ class MainWidget(QtGui.QWidget):
         self.progress_bars = []
         super(MainWidget, self).__init__(parent)
 
-        self.layout_ = QtGui.QVBoxLayout()
+        self.container_widget = QtGui.QWidget()
+        self.container_layout = QtGui.QVBoxLayout(self)
+        self.container_widget.setLayout(self.container_layout)
+
+        self.scroll_area = QtGui.QScrollArea()
+        self.scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setWidgetResizable(False)
+        self.scroll_area.setWidget(self.container_widget)
+        
+        self.layout_ = QtGui.QVBoxLayout(self)
+        self.layout_.addWidget(self.scroll_area)
         self.setLayout(self.layout_)
 
     def add_upload_tracker(self, upload_manager):
         pbar = UploadTracker(upload_manager)
         self.progress_bars.append(pbar)
-        self.layout_.addWidget(pbar)
+        self.container_layout.addWidget(pbar)
         upload_manager.start()
+        self.container_widget.resize(1000, 75 * len(self.progress_bars))
 
 app = QtGui.QApplication(sys.argv)
 
 # Obtain the API token from the keyring if it exists. Otherwise, have the user enter it.
 api_token = keyring.get_password(APP_NAME, username)
-api_token = ''
 if not api_token:
     #Open dialog box to obtain api_token from user and store it
     dialog = ApiTokenDialog()

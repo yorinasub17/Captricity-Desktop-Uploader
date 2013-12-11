@@ -2,18 +2,20 @@
 Contains all the utility funcs.
 '''
 import re
-import sip
 
-def delete_layout(layout):
+def delete_layout(layout, delete_container=True):
     if layout is None: return
     for i in reversed(range(layout.count())):
         item = layout.itemAt(i).widget()
+        layout.removeItem(layout.itemAt(i))
         if item is not None:
             item.setParent(None)
         else:
-            delete_layout(layout.itemAt(i).layout())
-    sip.delete(layout)
-    del layout
+            delete_layout(layout.itemAt(i).layout(), delete_container=True)
+
+    if delete_container:
+        layout.deleteLater()
+        del layout
     
 def ident(x):
     return x

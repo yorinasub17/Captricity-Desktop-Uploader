@@ -6,23 +6,38 @@ import glob
 import itertools
 from captools.api import Client
 
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 from utils import delete_layout, natural_sort
 
 class NewUploadWindow(QtGui.QWidget):
+    MENU_WINDOW = 0
+    LIST_WINDOW = 1
+    CONFIRM_WINDOW = 2
+
     def __init__(self, cap_client, main_window, parent=None):
         self.cap_client = cap_client
         self.main_window = main_window
-        self.layout_ = None
         self.upload_manager = None
+
+        self.menu_layout = QtGui.QVBoxLayout()
+        self.menu_widget = QtGui.QWidget()
+        self.menu_widget.setLayout(self.menu_layout)
+        self.list_layout = QtGui.QVBoxLayout()
+        self.list_widget = QtGui.QWidget()
+        self.list_widget.setLayout(self.list_layout)
+        self.confirm_layout = QtGui.QVBoxLayout()
+        self.confirm_widget = QtGui.QWidget()
+        self.confirm_widget.setLayout(self.confirm_layout)
+        self.layout_ = QtGui.QStackedLayout()
+        self.layout_.addWidget(self.menu_widget)
+        self.layout_.addWidget(self.list_widget)
+        self.layout_.addWidget(self.confirm_widget)
+
         super(NewUploadWindow, self).__init__(parent)
 
-        self.load_menu_window()
-
-    def refresh_layout(self):
         self.setLayout(self.layout_)
-        self.show()
+        self.load_menu_window()
 
     def upload_to_document(self):
         document_getter = lambda: self.cap_client.read_documents('?user_visible=true&active=true')
@@ -58,7 +73,9 @@ class NewUploadWindow(QtGui.QWidget):
         self.main_window.add_upload_tracker(self.upload_manager)
 
     def load_menu_window(self):
-        delete_layout(self.layout_)
+        delete_layout(self.menu_layout, delete_container=False)
+        self.layout_.setCurrentIndex(NewUploadWindow.MENU_WINDOW)
+
         self.load_prev_window = self.cancel
         self.load_current_window = self.load_menu_window
 
@@ -74,14 +91,14 @@ class NewUploadWindow(QtGui.QWidget):
         cancel = QtGui.QPushButton('Cancel', self)
         self.connect(cancel, QtCore.SIGNAL('clicked()'), self.load_prev_window)
 
-        self.layout_ = QtGui.QVBoxLayout()
-        self.layout_.addWidget(upload_to_document)
-        self.layout_.addWidget(upload_to_job)
-        self.layout_.addWidget(cancel)
-        self.refresh_layout()
+        self.menu_layout.addWidget(upload_to_document)
+        self.menu_layout.addWidget(upload_to_job)
+        self.menu_layout.addWidget(cancel)
 
     def load_list_window(self, get_captricity_objects, callback_func_generator):
-        delete_layout(self.layout_)
+        delete_layout(self.list_layout, delete_container=False)
+        self.layout_.setCurrentIndex(NewUploadWindow.LIST_WINDOW)
+
         self.load_prev_window = self.load_menu_window
         self.load_current_window = lambda: self.load_list_window(get_captricity_objects, callback_func_generator)
 
@@ -108,13 +125,13 @@ class NewUploadWindow(QtGui.QWidget):
         for button in buttons:
             button_layout.addWidget(button)
 
-        self.layout_ = QtGui.QVBoxLayout()
-        self.layout_.addLayout(button_layout)
-        self.layout_.addLayout(actions_layout)
-        self.refresh_layout()
+        self.list_layout.addLayout(button_layout)
+        self.list_layout.addLayout(actions_layout)
 
     def load_confirm_window(self, upload_manager):
-        delete_layout(self.layout_)
+        delete_layout(self.confirm_layout, delete_container=False)
+        self.layout_.setCurrentIndex(NewUploadWindow.CONFIRM_WINDOW)
+
         self.load_prev_window = self.load_current_window
         self.load_current_window = lambda: self.load_confirm_window(upload_manager)
 
@@ -135,14 +152,12 @@ class NewUploadWindow(QtGui.QWidget):
         actions_layout.addWidget(cancel_button)
         actions_layout.addWidget(next_button)
 
-        self.layout_ = QtGui.QVBoxLayout()
-        self.layout_.addWidget(instructions)
-        self.layout_.addWidget(list_widget)
-        self.layout_.addLayout(actions_layout)
-        self.refresh_layout()
+        self.confirm_layout.addWidget(instructions)
+        self.confirm_layout.addWidget(list_widget)
+        self.confirm_layout.addLayout(actions_layout)
 
 class UploadTracker(QtGui.QWidget):
-    image_uploaded = QtCore.pyqtSignal()
+    image_uploaded = QtCore.Signal()
 
     def __init__(self, upload_manager, parent=None):
         self.upload_manager = upload_manager

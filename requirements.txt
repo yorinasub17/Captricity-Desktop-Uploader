@@ -1,2 +1,3 @@
 captricity-python-client
 keyring
+PySide
