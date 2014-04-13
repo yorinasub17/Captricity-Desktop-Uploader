@@ -2,6 +2,7 @@ import sys
 import keyring
 import getpass
 import multiprocessing
+from utils import resource_path
 from captools.api import Client
 
 from PySide import QtGui, QtCore
@@ -55,12 +56,12 @@ class MainWindow(QtGui.QMainWindow):
         self.resize(350, 250)
         self.setWindowTitle(APP_NAME)
 
-        new_upload = QtGui.QAction(QtGui.QIcon('icons/Gnome-mail-message-new.png'), 'New Upload', self)
+        new_upload = QtGui.QAction(QtGui.QIcon(resource_path('icons/Gnome-mail-message-new.png')), 'New Upload', self)
         new_upload.setShortcut('Ctrl+N')
         new_upload.setStatusTip('Initiate a new upload to Captricity')
         self.connect(new_upload, QtCore.SIGNAL('triggered()'), self.initiate_new_upload)
 
-        exit = QtGui.QAction(QtGui.QIcon('icons/Gnome-application-exit.png'), 'Exit', self)
+        exit = QtGui.QAction(QtGui.QIcon(resource_path('icons/Gnome-application-exit.png')), 'Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.setStatusTip('Exit application')
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))

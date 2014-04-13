@@ -3,7 +3,6 @@ Contains all the GUI and backend code to initiate new uploads to Captricity.
 '''
 import os
 import glob
-import itertools
 from captools.api import Client
 
 from PySide import QtCore, QtGui
@@ -114,7 +113,7 @@ class NewUploadWindow(QtGui.QWidget):
         self.connect(create_button, QtCore.SIGNAL('clicked()'), self.load_create_window)
 
         refresh_button = QtGui.QPushButton('Refresh', self)
-        self.connect(refresh_button, QtCore.SIGNAL('clicked()'), lambda: self.load_list_window(get_captricity_objects, callback_func_generator))
+        self.connect(refresh_button, QtCore.SIGNAL('clicked()'), self.load_current_window)
 
         back_button = QtGui.QPushButton('Back', self)
         self.connect(back_button, QtCore.SIGNAL('clicked()'), self.load_prev_window)
