@@ -56,12 +56,12 @@ class MainWindow(QtGui.QMainWindow):
         self.resize(350, 250)
         self.setWindowTitle(APP_NAME)
 
-        new_upload = QtGui.QAction(QtGui.QIcon(resource_path('icons/Gnome-mail-message-new.png')), 'New Upload', self)
+        new_upload = QtGui.QAction('New Upload', self)
         new_upload.setShortcut('Ctrl+N')
         new_upload.setStatusTip('Initiate a new upload to Captricity')
         self.connect(new_upload, QtCore.SIGNAL('triggered()'), self.initiate_new_upload)
 
-        exit = QtGui.QAction(QtGui.QIcon(resource_path('icons/Gnome-application-exit.png')), 'Exit', self)
+        exit = QtGui.QAction('Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.setStatusTip('Exit application')
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
@@ -117,19 +117,20 @@ class MainWidget(QtGui.QWidget):
         upload_manager.start()
         self.container_widget.resize(1000, 75 * len(self.progress_bars))
 
-app = QtGui.QApplication(sys.argv)
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv)
 
-# Obtain the API token from the keyring if it exists. Otherwise, have the user enter it.
-api_token = keyring.get_password(APP_NAME, username)
-if not api_token:
-    #Open dialog box to obtain api_token from user and store it
-    dialog = ApiTokenDialog()
-    if not dialog.exec_() == QtGui.QDialog.Accepted:
-        sys.exit(0)
-    client = dialog.client
-else:
-    client = Client(api_token)
+    # Obtain the API token from the keyring if it exists. Otherwise, have the user enter it.
+    api_token = keyring.get_password(APP_NAME, username)
+    if not api_token:
+        #Open dialog box to obtain api_token from user and store it
+        dialog = ApiTokenDialog()
+        if not dialog.exec_() == QtGui.QDialog.Accepted:
+            sys.exit(0)
+        client = dialog.client
+    else:
+        client = Client(api_token)
 
-main = MainWindow(client)
-main.show()
-sys.exit(app.exec_())
+    main = MainWindow(client)
+    main.show()
+    sys.exit(app.exec_())

@@ -19,13 +19,11 @@ hiddenimports = ['keyring.credentials',
                  'keyring.util.platform_',
                  'keyring.util.properties']
 
-a = Analysis(['capdesk.py', 'new_upload.py', 'utils.py'],
+a = Analysis(['capdesk.py'],
              pathex=[root],
              hiddenimports=hiddenimports,
              hookspath=None,
              runtime_hooks=None)
-a.datas += [('icons/Gnome-application-exit.png', 'icons/Gnome-application-exit.png', 'DATA'),
-            ('icons/Gnome-mail-message-new.png', 'icons/Gnome-mail-message-new.png', 'DATA')]
 
 pyz = PYZ(a.pure)
 exe = EXE(pyz,
@@ -36,8 +34,8 @@ exe = EXE(pyz,
           name=os.path.join(root, 'dist', 'capdesk'),
           debug=False,
           strip=None,
-          upx=True,
+          upx=False,
           console=False )
 app = BUNDLE(exe,
              name=os.path.join(root, 'dist', 'capdesk.app'),
-             icon=None)
+             icon='icons/CapIcon.icns')
