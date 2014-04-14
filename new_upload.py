@@ -7,7 +7,7 @@ from captools.api import Client
 
 from PySide import QtCore, QtGui
 
-from utils import delete_layout, natural_sort
+from utils import delete_layout, natural_sort, is_supported_file
 
 class NewUploadWindow(QtGui.QWidget):
     MENU_WINDOW = 0
@@ -218,7 +218,7 @@ class Uploader(object):
         self.client = client
         self.pool = pool
         self.directory = directory
-        self.files = natural_sort(glob.glob(os.path.join(directory, '*')))
+        self.files = natural_sort(filter(is_supported_file, glob.glob(os.path.join(directory, '*'))))
 
     def link_pbar(self, pbar):
         self.linked_pbar = pbar

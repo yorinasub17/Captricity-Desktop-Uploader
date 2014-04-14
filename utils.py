@@ -4,6 +4,7 @@ Contains all the utility funcs.
 import os
 import re
 import sys
+import imghdr
 
 def delete_layout(layout, delete_container=True):
     if layout is None: return
@@ -40,3 +41,12 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
+def is_supported_file(fname):
+    if os.path.isfile(fname):
+        if imghdr.what(fname) in ('tiff', 'jpeg', 'png', 'gif'):
+            return True
+        if fname.lower().endswith('.pdf'):
+            return True
+    return False
+
