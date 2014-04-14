@@ -2,7 +2,6 @@ import sys
 import keyring
 import getpass
 import multiprocessing
-from utils import resource_path
 from captools.api import Client
 
 from PySide import QtGui, QtCore
@@ -133,4 +132,6 @@ if __name__ == '__main__':
 
     main = MainWindow(client)
     main.show()
+    if sys.platform == 'darwin':
+        main.raise_()
     sys.exit(app.exec_())
